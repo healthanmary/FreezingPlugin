@@ -1,0 +1,11 @@
+name: Freezing
+version: '${version}'
+main: ru.dumpcave.freezing.Freezing
+api-version: '1.16'
+authors: [ DumpCave ]
+commands:
+  check:
+    usage: /check [Player]
+    description: Замораживает игроков
+    permission: freezing.use
+    permission-message: У вас нет прав для использования этой команды
