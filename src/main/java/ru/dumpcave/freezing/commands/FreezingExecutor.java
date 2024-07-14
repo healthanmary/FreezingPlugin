@@ -14,10 +14,13 @@ import java.util.HashMap;
 
 public class FreezingExecutor implements CommandExecutor {
 
-    public HashMap<Player, Boolean> playersInFreeze = new HashMap<>();
-    private final String plName = ChatColor.YELLOW + "[" + ChatColor.DARK_GREEN + "Проверка" + ChatColor.YELLOW + "] " + ChatColor.WHITE;
+    private HashMap<Player, Boolean> playersInFreeze = new HashMap<>();
     public HashMap<Player, Boolean> getPlayersInFreeze() {
         return playersInFreeze; }
+
+    private final String plName = ChatColor.YELLOW + "[" + ChatColor.DARK_GREEN + "Проверка" + ChatColor.YELLOW + "] " + ChatColor.WHITE;
+    public String getPlName() {
+        return plName; }
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
@@ -32,6 +35,7 @@ public class FreezingExecutor implements CommandExecutor {
         if (targetPlayer == null) {
             sender.sendMessage(plName+"Игрок не найден.");
             return true; }
+
         if (playersInFreeze.get(targetPlayer) == null) {
             playersInFreeze.put(targetPlayer, true);
             targetPlayer.teleport(new Location(Bukkit.getWorld("world"), -51.500, 192, -123.500));
@@ -39,8 +43,9 @@ public class FreezingExecutor implements CommandExecutor {
             targetPlayer.playSound(targetPlayer.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
             sender.sendMessage(plName+"Вы вызвали игрока " + ChatColor.RED + targetPlayer.getName());
             targetPlayer.sendMessage(plName+"Вы были вызваны на проверку!");
-            return true;
-        } else {
+            return true; }
+
+         else {
             playersInFreeze.put(targetPlayer, null);
             targetPlayer.resetTitle();
             sender.sendMessage(plName+"Вы сняли проверку с игрока " + ChatColor.RED + targetPlayer.getName());

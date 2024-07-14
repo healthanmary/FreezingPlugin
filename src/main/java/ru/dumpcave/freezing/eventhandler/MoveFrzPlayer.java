@@ -6,11 +6,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import ru.dumpcave.freezing.commands.FreezingExecutor;
 
-public class MoveFrzPlayer extends FreezingExecutor implements Listener {
+import java.util.HashMap;
+
+public class MoveFrzPlayer implements Listener {
+    private final FreezingExecutor freezingExecutor;
+    public MoveFrzPlayer(FreezingExecutor freezingExecutor) {
+        this.freezingExecutor = freezingExecutor; }
     @EventHandler
     private void on(PlayerMoveEvent event) {
         Player playerInEvent = event.getPlayer();
-        Boolean isFrozen = playersInFreeze.get(playerInEvent);
+        HashMap<Player, Boolean> players = freezingExecutor.getPlayersInFreeze();
+        Boolean isFrozen = players.get(playerInEvent);
         if (isFrozen != null) {
             event.setCancelled(true);
         }
