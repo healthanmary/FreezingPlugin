@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.dumpcave.freezing.Freezing;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 public class FreezingExecutor implements CommandExecutor {
@@ -37,17 +39,19 @@ public class FreezingExecutor implements CommandExecutor {
             sender.sendMessage(plName+"Игрок не найден.");
             return true; }
 
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedNow = now.format(formatter);
         if (playersInFreeze.get(targetPlayer) == null) {
-            freezing.logToFile(sender.getName() + " заморозил " + targetPlayer.getName());
+            freezing.logToFile("["+formattedNow+"] Администратор "+sender.getName() + " заморозил  " + targetPlayer.getName());
             playersInFreeze.put(targetPlayer, true);
             targetPlayer.teleport(new Location(Bukkit.getWorld("world"), -51.500, 192, -123.500));
             targetPlayer.sendTitle("§4ПРОВЕРКА НА ЧИТЫ", "Следуйте инструкциям в чате.", 15, 600000, 0);
             targetPlayer.playSound(targetPlayer.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
             sender.sendMessage(plName+"Вы вызвали игрока " + ChatColor.RED + targetPlayer.getName());
             return true; }
-
          else {
-            freezing.logToFile(sender.getName() + " разморозил " + targetPlayer.getName());
+            freezing.logToFile("["+formattedNow+"] Администратор "+sender.getName() + " разморозил " + targetPlayer.getName());
             playersInFreeze.put(targetPlayer, null);
             targetPlayer.resetTitle();
             sender.sendMessage(plName+"Вы сняли проверку с игрока " + ChatColor.RED + targetPlayer.getName());
