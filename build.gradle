@@ -18,6 +18,12 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.yaml:snakeyaml:2.0'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
     compileOnly "com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT"
 }
 

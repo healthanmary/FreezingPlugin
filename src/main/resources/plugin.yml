@@ -9,3 +9,5 @@ commands:
     description: Замораживает игроков
     permission: freezing.use
     permission-message: У вас нет прав для использования этой команды
+  isfrozen:
+    usage: /isfrozen player
