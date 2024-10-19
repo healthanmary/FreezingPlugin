@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -81,9 +82,14 @@ public class ProphibitPlayerActions implements Listener {
         if (isFrozen(targetPlayer.getUniqueId())) e.setCancelled(true);
     }
     @EventHandler
-    public void on(EntityDamageEvent e) {
+    public void onEntityDamageEvent(EntityDamageEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         Player targetPlayer = (Player) e.getEntity();
+        if (isFrozen(targetPlayer.getUniqueId())) e.setCancelled(true);
+    }
+    @EventHandler
+    public void onEntityDamageEvent2(EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof Player targetPlayer)) return;
         if (isFrozen(targetPlayer.getUniqueId())) e.setCancelled(true);
     }
 }
