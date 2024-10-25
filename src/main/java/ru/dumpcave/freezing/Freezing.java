@@ -33,7 +33,7 @@ public final class Freezing extends JavaPlugin {
         }    catch (IOException e) {
             e.printStackTrace(); }
         getCommand("check").setExecutor(freezingExecutor);
-        getServer().getPluginManager().registerEvents(new ProphibitPlayerActions(freezingExecutor), this);
+        getServer().getPluginManager().registerEvents(new ProphibitPlayerActions(this, freezingExecutor), this);
     }
     @Override
     public void onDisable() {
