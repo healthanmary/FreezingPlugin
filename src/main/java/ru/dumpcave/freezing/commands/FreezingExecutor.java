@@ -29,6 +29,22 @@ public class FreezingExecutor implements CommandExecutor {
     private final List<UUID> playersInFreeze = new ArrayList<>();
     @Getter
     private final String plName = ChatColor.YELLOW + "[" + ChatColor.DARK_GREEN + "Проверка" + ChatColor.YELLOW + "] " + ChatColor.WHITE;
+    public void sendTextTitle(Player targetPlayer) {
+        String red_color = "#FF0000";
+        String blue_color = "#ACE5EE";
+        targetPlayer.sendTitle(net.md_5.bungee.api.ChatColor.of(red_color) + "ПРОВЕРКА НА ЧИТЫ", "Следуйте инструкциям в чате", 15, 340, 0);
+        targetPlayer.sendMessage("");
+        targetPlayer.sendMessage(net.md_5.bungee.api.ChatColor.of(red_color) +"⚠ "+ChatColor.WHITE+"Вы были вызваны на"+net.md_5.bungee.api.ChatColor.of(red_color) + " проверку читов!");
+        targetPlayer.sendMessage("Чтобы "+ChatColor.GOLD+"выполнить нижеуказанные действия "+ChatColor.WHITE+"у вас есть 7 минут!");
+        targetPlayer.sendMessage("");
+        targetPlayer.sendMessage(ChatColor.GOLD +"1."+ChatColor.WHITE+" Зайдите на сайт: "+net.md_5.bungee.api.ChatColor.of(blue_color)+ChatColor.UNDERLINE+"anydesk.com/ru/downloads" + ChatColor.RESET+ChatColor.GRAY+" (Кликабельно)");
+        targetPlayer.sendMessage(ChatColor.GOLD+"2."+ChatColor.WHITE+" Нажмите красную кнопку "+net.md_5.bungee.api.ChatColor.of(blue_color)+"\"Скачать\"");
+        targetPlayer.sendMessage(ChatColor.GOLD+"3. "+ChatColor.WHITE+"Зайдите в программу");
+        targetPlayer.sendMessage(ChatColor.GOLD+"4. "+ChatColor.WHITE+"Сообщите свой логин "+net.md_5.bungee.api.ChatColor.of(blue_color)+"(красные цифры посередине) "+ChatColor.WHITE+"модератору");
+        targetPlayer.sendMessage("");
+        targetPlayer.sendMessage(net.md_5.bungee.api.ChatColor.of(red_color) +"Отказ / лив / неадекватное поведение / игнор "+ChatColor.WHITE+"- "+net.md_5.bungee.api.ChatColor.of(red_color)+"бан");
+        targetPlayer.sendMessage("");
+    }
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
@@ -51,7 +67,6 @@ public class FreezingExecutor implements CommandExecutor {
 
         if (!playersInFreeze.contains(targetUuid)) {
             freezing.logToFile("["+formattedNow+"] Администратор "+sender.getName() + " заморозил  " + targetPlayer.getName(), "logs.yml");
-            freezing.logToFile(targetPlayer.getName(), "players_in_freeze.yml");
             playersInFreeze.add(targetUuid);
             flyAbilityMap.put(targetUuid, targetPlayer.getAllowFlight());
 
@@ -61,19 +76,7 @@ public class FreezingExecutor implements CommandExecutor {
             targetPlayer.setAllowFlight(true);
             targetPlayer.playSound(targetPlayer.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
             int taskId = Bukkit.getScheduler().runTaskTimer(freezing, () -> {
-                targetPlayer.sendTitle(net.md_5.bungee.api.ChatColor.of("#FF0000") + "ПРОВЕРКА НА ЧИТЫ", "Следуйте инструкциям в чате", 15, 340, 0);
-                targetPlayer.sendMessage("");
-                targetPlayer.sendMessage(net.md_5.bungee.api.ChatColor.of("#FF0000") +"⚠ "+ChatColor.WHITE+"Вы были вызваны на"+net.md_5.bungee.api.ChatColor.of("#FF0000") + " проверку читов!");
-                targetPlayer.sendMessage("Чтобы "+ChatColor.GOLD+"выполнить нижеуказанные действия "+ChatColor.WHITE+"у вас есть 7 минут!");
-                targetPlayer.sendMessage("");
-                targetPlayer.sendMessage(ChatColor.GOLD +"1."+ChatColor.WHITE+" Зайдите на сайт: "+net.md_5.bungee.api.ChatColor.of("#ACE5EE")+ChatColor.UNDERLINE+"anydesk.com/ru/downloads" + ChatColor.RESET+ChatColor.GRAY+" (Кликабельно)");
-                targetPlayer.sendMessage(ChatColor.GOLD+"2."+ChatColor.WHITE+" Нажмите красную кнопку "+net.md_5.bungee.api.ChatColor.of("#ACE5EE")+"\"Скачать\"");
-                targetPlayer.sendMessage(ChatColor.GOLD+"3. "+ChatColor.WHITE+"Зайдите в программу");
-                targetPlayer.sendMessage(ChatColor.GOLD+"4. "+ChatColor.WHITE+"Сообщите свой логин "+net.md_5.bungee.api.ChatColor.of("#ACE5EE")+"(красные цифры посередине) "+ChatColor.WHITE+"модератору");
-                targetPlayer.sendMessage("");
-                targetPlayer.sendMessage(net.md_5.bungee.api.ChatColor.of("#FF0000") +"Отказ / лив / неадекватное поведение / игнор "+ChatColor.WHITE+"- "+net.md_5.bungee.api.ChatColor.of("#FF0000")+"бан");
-                targetPlayer.sendMessage("");
-
+                sendTextTitle(targetPlayer);
 
             }, 0L, 350L).getTaskId();
             taskIdMap.put(targetUuid, taskId);
