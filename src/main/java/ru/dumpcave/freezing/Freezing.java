@@ -7,10 +7,7 @@ import ru.dumpcave.freezing.commands.GetFrozen;
 import ru.dumpcave.freezing.eventhandler.ProphibitPlayerActions;
 import ru.dumpcave.freezing.util.YamlReader;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +20,7 @@ public final class Freezing extends JavaPlugin {
         Config.load(getConfig());
         saveConfig();
         freezingExecutor = new FreezingExecutor(this);
+        conventToArray();
         try {
             File pluginDirectory = getDataFolder();
             if (!pluginDirectory.exists()) {
@@ -70,5 +68,26 @@ public final class Freezing extends JavaPlugin {
             pw.close();
         } catch (IOException e) {
             e.printStackTrace(); }
+    }
+    public void conventToArray() {
+        /*
+        1. Прочитать каждую строку
+        2. каждая строка добавляется в массив
+        */
+        String filePath = getDataFolder().getPath() + "\\frozen_players.yml";
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                try {
+                    UUID uuid = UUID.fromString(line);
+                    freezingExecutor.addToPlayersInFreeze(uuid);
+                    System.out.println(line + " UUID занесен");
+                } catch (IllegalArgumentException e) {
+                    getServer().getLogger().warning("Неверный формат UUID: " + line);
+                }
+            }
+        } catch (IOException e) {
+            getServer().getLogger().warning("Ошибка чтения файла frozen_players.yml");
+        }
     }
 }

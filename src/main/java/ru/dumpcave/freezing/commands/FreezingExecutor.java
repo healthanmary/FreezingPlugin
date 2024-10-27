@@ -27,6 +27,9 @@ public class FreezingExecutor implements CommandExecutor {
     private Map<UUID, Boolean> flyAbilityMap = new HashMap<>();
     @Getter
     private final List<UUID> playersInFreeze = new ArrayList<>();
+    public void addToPlayersInFreeze(UUID uuid) {
+        playersInFreeze.add(uuid);
+    }
     @Getter
     private final String plName = ChatColor.YELLOW + "[" + ChatColor.DARK_GREEN + "Проверка" + ChatColor.YELLOW + "] " + ChatColor.WHITE;
     public void sendTextTitle(Player targetPlayer) {
