@@ -17,14 +17,17 @@ import java.util.*;
 
 public class FreezingExecutor implements CommandExecutor {
     private Freezing freezing;
-    public FreezingExecutor(Freezing freezing) {this.freezing = freezing;
-
+    public FreezingExecutor(Freezing freezing) {
+        this.freezing = freezing;
     }
     @Getter
     private Map<UUID, Integer> taskIdMap = new HashMap<>();
     public void setTaskIdMap(UUID uuid, Integer number) { taskIdMap.put(uuid, number); }
     @Getter
     private Map<UUID, Boolean> flyAbilityMap = new HashMap<>();
+    public void setFlyAbilityMap(UUID uuid, Boolean state) {
+        flyAbilityMap.put(uuid, state);
+    }
     @Getter
     private final List<UUID> playersInFreeze = new ArrayList<>();
     public void addToPlayersInFreeze(UUID uuid) {
@@ -58,11 +61,8 @@ public class FreezingExecutor implements CommandExecutor {
         if (targetPlayer == null) {
             sender.sendMessage(plName+"Игрок не найден.");
             return true; }
-        UUID targetUuid = targetPlayer.getUniqueId();
 
-        String path = freezing.getFilePath();
-        File file = new File(freezing.getDataFolder(), "players_in_freeze.yml");
-        String path2 = file.getPath();
+        UUID targetUuid = targetPlayer.getUniqueId();
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -86,7 +86,11 @@ public class FreezingExecutor implements CommandExecutor {
             sender.sendMessage(plName+"Вы вызвали игрока " + ChatColor.RED + targetPlayer.getName());
             return true; }
         else {
-            if (!flyAbilityMap.get(targetUuid)) targetPlayer.setAllowFlight(false);
+            if (flyAbilityMap.get(targetUuid) != null) {
+                if (!flyAbilityMap.get(targetUuid)) {
+                    targetPlayer.setAllowFlight(false);
+                }
+            }
             if (taskIdMap.get(targetUuid) != null) {
                 Bukkit.getScheduler().cancelTask(taskIdMap.get(targetUuid));
                 taskIdMap.remove(targetUuid);
@@ -94,7 +98,6 @@ public class FreezingExecutor implements CommandExecutor {
             else freezing.getLogger().warning(ChatColor.RED + "Невозможно отменить задачу, потому что taskId не найден. UUID игрока: " + targetPlayer);
             freezing.logToFile("["+formattedNow+"] Администратор "+sender.getName() + " разморозил " + targetPlayer.getName(), "logs.yml");
             playersInFreeze.remove(targetUuid);
-//            yamlReader.deleteName(targetPlayer.getName());
             targetPlayer.resetTitle();
             sender.sendMessage(plName+"Вы сняли проверку с игрока " + ChatColor.RED + targetPlayer.getName());
             return true;

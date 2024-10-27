@@ -3,6 +3,8 @@ package ru.dumpcave.freezing.eventhandler;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
+import ru.dumpcave.freezing.Config;
 import ru.dumpcave.freezing.Freezing;
 import ru.dumpcave.freezing.commands.FreezingExecutor;
 
@@ -42,7 +45,9 @@ public class ProphibitPlayerActions implements Listener {
     }
     @EventHandler
     private void onPlayerQuitEvent(PlayerQuitEvent e) {
+        Player player = e.getPlayer();
         if (!isFrozen(e.getPlayer().getUniqueId())) return;
+        /*Эта строка не работает :( */ player.setAllowFlight(false);
         Bukkit.broadcast(freezingExecutor.getPlName()+"Замороженный игрок "+ ChatColor.RED +
                 e.getPlayer().getName()  + ChatColor.WHITE+" вышел из игры!", "freezing.use");
     }
@@ -73,6 +78,10 @@ public class ProphibitPlayerActions implements Listener {
         UUID targetUuid = targetPlayer.getUniqueId();
 
         if (!isFrozen(targetPlayer.getUniqueId())) return;
+        targetPlayer.setAllowFlight(true);
+        targetPlayer.playSound(targetPlayer.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
+        if (Bukkit.getWorld(Config.Cords.worldname) != null) targetPlayer.teleport(new Location(Bukkit.getWorld(Config.Cords.worldname), Config.Cords.xCord, Config.Cords.yCord, Config.Cords.zCord));
+        else System.out.println(ChatColor.DARK_RED +""+ ChatColor.BOLD + "ОШИБКА! " + ChatColor.RED + "Некорректно указано название мира в конфиге! Секция \"worldname\"");
         int taskId = Bukkit.getScheduler().runTaskTimer(freezing, () -> {
             freezingExecutor.sendTextTitle(targetPlayer);
         }, 0L, 350L).getTaskId();

@@ -1,11 +1,15 @@
 package ru.dumpcave.freezing;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.dumpcave.freezing.commands.FreezingExecutor;
 import ru.dumpcave.freezing.commands.GetFrozen;
 import ru.dumpcave.freezing.eventhandler.ProphibitPlayerActions;
-import ru.dumpcave.freezing.util.YamlReader;
 
 import java.io.*;
 import java.util.List;
@@ -36,10 +40,12 @@ public final class Freezing extends JavaPlugin {
         getCommand("check").setExecutor(freezingExecutor);
         getCommand("GetFrozen").setExecutor(new GetFrozen(freezingExecutor));
         getServer().getPluginManager().registerEvents(new ProphibitPlayerActions(this, freezingExecutor), this);
+        activeActions();
     }
     @Override
     public void onDisable() {
-        System.out.println("Массив "+freezingExecutor.getPlayersInFreeze().toString());
+        System.out.println("Массив UUID замороженных игроков: "+freezingExecutor.getPlayersInFreeze().toString());
+        disableFly();
         logUUidsToFile(freezingExecutor.getPlayersInFreeze());
     }
     public void logToFile(String message, String fileName) {
@@ -58,7 +64,7 @@ public final class Freezing extends JavaPlugin {
         String fileName = "frozen_players.yml";
         try {
             File finalDir = new File(getDataFolder(), fileName);
-            FileWriter fw = new FileWriter(finalDir, true);
+            FileWriter fw = new FileWriter(finalDir, false);
             PrintWriter pw = new PrintWriter(fw);
 
             for (UUID uuid : uuidList) {
@@ -70,10 +76,6 @@ public final class Freezing extends JavaPlugin {
             e.printStackTrace(); }
     }
     public void conventToArray() {
-        /*
-        1. Прочитать каждую строку
-        2. каждая строка добавляется в массив
-        */
         String filePath = getDataFolder().getPath() + "\\frozen_players.yml";
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -81,13 +83,36 @@ public final class Freezing extends JavaPlugin {
                 try {
                     UUID uuid = UUID.fromString(line);
                     freezingExecutor.addToPlayersInFreeze(uuid);
-                    System.out.println(line + " UUID занесен");
+                    System.out.println(line + " UUID занесен в HaspMap");
                 } catch (IllegalArgumentException e) {
                     getServer().getLogger().warning("Неверный формат UUID: " + line);
                 }
             }
         } catch (IOException e) {
             getServer().getLogger().warning("Ошибка чтения файла frozen_players.yml");
+        }
+    }
+    private void disableFly() {
+        for (UUID uuid : freezingExecutor.getPlayersInFreeze()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline())
+                player.setAllowFlight(false);
+        }
+    }
+    private void activeActions() {
+        for (UUID uuid : freezingExecutor.getPlayersInFreeze()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline()) {
+                int taskId = Bukkit.getScheduler().runTaskTimer(this, () -> {
+                    freezingExecutor.sendTextTitle(player);
+                }, 0L, 350L).getTaskId();
+                freezingExecutor.setTaskIdMap(uuid, taskId);
+                player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
+                freezingExecutor.setFlyAbilityMap(uuid, player.getAllowFlight());
+                if (Bukkit.getWorld(Config.Cords.worldname) != null) player.teleport(new Location(Bukkit.getWorld(Config.Cords.worldname), Config.Cords.xCord, Config.Cords.yCord, Config.Cords.zCord));
+                else System.out.println(ChatColor.DARK_RED +""+ ChatColor.BOLD + "ОШИБКА! " + ChatColor.RED + "Некорректно указано название мира в конфиге! Секция \"worldname\"");
+                player.setAllowFlight(true);
+            }
         }
     }
 }
