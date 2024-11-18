@@ -9,12 +9,11 @@ public class Config {
     public static void load(FileConfiguration file) {
         final var cordSection = file.getConfigurationSection("freezeingpos");
         if (cordSection == null) {
+            System.out.println("нет сеекции");
             throw new IllegalStateException("Error with freezeingpos");
         }
         parseCords(cordSection);
-
     }
-
     public static void parseCords(ConfigurationSection section) {
         Cords.xCord = section.getInt("x");
         Cords.yCord = section.getInt("y");

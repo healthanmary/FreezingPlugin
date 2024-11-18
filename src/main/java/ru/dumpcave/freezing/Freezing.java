@@ -8,7 +8,8 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.dumpcave.freezing.commands.FreezingExecutor;
-import ru.dumpcave.freezing.commands.GetFrozen;
+import ru.dumpcave.freezing.db.LogToDbCommand;
+import ru.dumpcave.freezing.db.isConnedtedCmd;
 import ru.dumpcave.freezing.eventhandler.ProphibitPlayerActions;
 
 import java.io.*;
@@ -23,6 +24,7 @@ public final class Freezing extends JavaPlugin {
     public void onEnable() {
         Config.load(getConfig());
         saveConfig();
+
         freezingExecutor = new FreezingExecutor(this);
         conventToArray();
         try {
@@ -38,13 +40,13 @@ public final class Freezing extends JavaPlugin {
         }    catch (IOException e) {
             e.printStackTrace(); }
         getCommand("check").setExecutor(freezingExecutor);
-        getCommand("GetFrozen").setExecutor(new GetFrozen(freezingExecutor));
+        getCommand("isconnected").setExecutor(new isConnedtedCmd());
+        getCommand("logtodb").setExecutor(new LogToDbCommand());
         getServer().getPluginManager().registerEvents(new ProphibitPlayerActions(this, freezingExecutor), this);
         activeActions();
     }
     @Override
     public void onDisable() {
-        System.out.println("Массив UUID замороженных игроков: "+freezingExecutor.getPlayersInFreeze().toString());
         disableFly();
         logUUidsToFile(freezingExecutor.getPlayersInFreeze());
     }

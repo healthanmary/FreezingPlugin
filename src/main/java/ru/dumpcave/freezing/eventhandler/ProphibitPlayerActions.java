@@ -59,8 +59,7 @@ public class ProphibitPlayerActions implements Listener {
         Set<String> allowedCommands = Set.of(
                 "/r",
                 "/m",
-                "/msg",
-                "/check"
+                "/msg"
         );
         String[] parts = command.split(" ");
         if (!allowedCommands.contains(parts[0])) {
