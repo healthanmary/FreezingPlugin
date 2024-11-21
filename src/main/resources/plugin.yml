@@ -7,6 +7,9 @@ commands:
   check:
     usage: /check [Player]
     description: Замораживает игроков
-    permission: freezing.use
+    permission: freezing.check
     permission-message: У вас нет прав для использования этой команды
-  logtodb:
+  checkhist:
+    usage: /checkhist [Player]
+    permission: freezing.hist
+    permission-message: У вас нет прав для использования этой команды

@@ -7,8 +7,9 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.dumpcave.freezing.commands.CheckHistCommand;
 import ru.dumpcave.freezing.commands.FreezingExecutor;
-import ru.dumpcave.freezing.db.LogToDbCommand;
+import ru.dumpcave.freezing.db.MySqlStorage;
 import ru.dumpcave.freezing.eventhandler.ProphibitPlayerActions;
 
 import java.io.*;
@@ -19,12 +20,14 @@ public final class Freezing extends JavaPlugin {
     @Getter
     private String filePath = getDataFolder().getPath();
     private FreezingExecutor freezingExecutor;
+    private MySqlStorage mySqlStorage;
     @Override
     public void onEnable() {
         Config.load(getConfig());
         saveConfig();
 
-        freezingExecutor = new FreezingExecutor(this);
+        mySqlStorage = new MySqlStorage();
+        freezingExecutor = new FreezingExecutor(this, mySqlStorage);
         conventToArray();
         try {
             File pluginDirectory = getDataFolder();
@@ -39,7 +42,7 @@ public final class Freezing extends JavaPlugin {
         }    catch (IOException e) {
             e.printStackTrace(); }
         getCommand("check").setExecutor(freezingExecutor);
-        getCommand("logtodb").setExecutor(new LogToDbCommand());
+        getCommand("checkhist").setExecutor(new CheckHistCommand());
         getServer().getPluginManager().registerEvents(new ProphibitPlayerActions(this, freezingExecutor), this);
         activeActions();
     }

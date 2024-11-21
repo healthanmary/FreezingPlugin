@@ -9,16 +9,20 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.dumpcave.freezing.Config;
 import ru.dumpcave.freezing.Freezing;
+import ru.dumpcave.freezing.db.MySqlStorage;
 
 import java.io.File;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class FreezingExecutor implements CommandExecutor {
     private Freezing freezing;
-    public FreezingExecutor(Freezing freezing) {
+    private final MySqlStorage mySqlStorage;
+    public FreezingExecutor(Freezing freezing, MySqlStorage mySqlStorage) {
         this.freezing = freezing;
+        this.mySqlStorage = mySqlStorage;
     }
     @Getter
     private Map<UUID, Integer> taskIdMap = new HashMap<>();
@@ -69,6 +73,7 @@ public class FreezingExecutor implements CommandExecutor {
         String formattedNow = now.format(formatter);
 
         if (!playersInFreeze.contains(targetUuid)) {
+            mySqlStorage.logToDB(sender.getName(), targetPlayer.getName(), "FREEZING", new Timestamp(System.currentTimeMillis()));
             freezing.logToFile("["+formattedNow+"] Администратор "+sender.getName() + " заморозил  " + targetPlayer.getName(), "logs.yml");
             playersInFreeze.add(targetUuid);
             flyAbilityMap.put(targetUuid, targetPlayer.getAllowFlight());
@@ -86,6 +91,7 @@ public class FreezingExecutor implements CommandExecutor {
             sender.sendMessage(plName+"Вы вызвали игрока " + ChatColor.RED + targetPlayer.getName());
             return true; }
         else {
+            mySqlStorage.logToDB(sender.getName(), targetPlayer.getName(), "UNFREEZING", new Timestamp(System.currentTimeMillis()));
             if (flyAbilityMap.get(targetUuid) != null) {
                 if (!flyAbilityMap.get(targetUuid)) {
                     targetPlayer.setAllowFlight(false);
