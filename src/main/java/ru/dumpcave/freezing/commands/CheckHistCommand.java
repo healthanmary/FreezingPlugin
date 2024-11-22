@@ -1,17 +1,26 @@
 package ru.dumpcave.freezing.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import ru.dumpcave.freezing.Freezing;
 import ru.dumpcave.freezing.db.MySqlStorage;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.text.SimpleDateFormat;
 
 public class CheckHistCommand implements CommandExecutor {
+    private Freezing freezing;
+
+    public CheckHistCommand(Freezing freezing) {
+        this.freezing = freezing;
+    }
+
     private boolean isFreezing(ResultSet rs) {
         String str = null;
         try {
@@ -19,8 +28,7 @@ public class CheckHistCommand implements CommandExecutor {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (str == "FREEZING") return true;
-        else return false;
+        return str.equals("FREEZING");
     }
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -37,29 +45,36 @@ public class CheckHistCommand implements CommandExecutor {
 
         String targetPlayerName = args[0];
         MySqlStorage mySqlStorage = new MySqlStorage();
-        int times = 0;
-        try {
-            Statement statement = mySqlStorage.getConnection().createStatement();
-            ResultSet rs = statement.executeQuery("select * from check_logs2");
-            sender.sendMessage(ChatColor.YELLOW+"➤ "+ChatColor.WHITE+"История "+ChatColor.GREEN+"проверок"+ChatColor.RED
-                    + ChatColor.WHITE+" игрока "+ ChatColor.RED+targetPlayerName + " "+ChatColor.GRAY +"("+ number+")");
-            while (rs.next() && times < number) {
-                times++;
-                if (rs.getString(3).equals(targetPlayerName)) {
-                    if (rs.getString(4).equals("FREEZING")) {
-                        sender.sendMessage(ChatColor.GOLD + "" + times + ". " + ChatColor.RED + "Некорректно записано значение state");
-                    } else if (isFreezing(rs)) {
-                        sender.sendMessage(ChatColor.GOLD+""+times+". "+ChatColor.LIGHT_PURPLE+"["+rs.getTimestamp(5)+"] "+ChatColor.YELLOW+rs.getString(2)
+        String query = "select * from check_logs2 where lower(target) = lower(?)";
+
+        Bukkit.getScheduler().runTaskAsynchronously(freezing, () -> {
+            int times = 0;
+            try (PreparedStatement ps = mySqlStorage.getConnection().prepareStatement(query)) {
+                ps.setString(1, targetPlayerName);
+                ResultSet rs = ps.executeQuery();
+
+                boolean alreadySend = false;
+                while (rs.next() && times < number) {
+                    if (!alreadySend) {
+                        sender.sendMessage(ChatColor.YELLOW+"➤ "+ChatColor.WHITE+"История "+ChatColor.GREEN+"проверок"+ChatColor.RED
+                                + ChatColor.WHITE+" игрока "+ ChatColor.RED+targetPlayerName + " "+ChatColor.GRAY +"("+ number+")");
+                        alreadySend = true;
+                    }
+                    times++;
+                    String fortatedDate = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(rs.getTimestamp(5));
+                    if (isFreezing(rs)) {
+                        sender.sendMessage(ChatColor.GOLD+""+times+". "+ChatColor.LIGHT_PURPLE+"["+fortatedDate+"] "+ChatColor.YELLOW+rs.getString(2)
                                 + ChatColor.WHITE + " заморозил " + ChatColor.GREEN + targetPlayerName);
                     } else if (!isFreezing(rs)) {
-                        sender.sendMessage(ChatColor.GOLD+""+times+". "+ChatColor.LIGHT_PURPLE+"["+rs.getTimestamp(5)+"] "+ChatColor.YELLOW+rs.getString(2)
+                        sender.sendMessage(ChatColor.GOLD+""+times+". "+ChatColor.LIGHT_PURPLE+"["+fortatedDate+"] "+ChatColor.YELLOW+rs.getString(2)
                                 + ChatColor.WHITE + " разморозил " + ChatColor.GREEN + targetPlayerName);
                     }
-                }
+                } if (times == 0) sender.sendMessage(ChatColor.YELLOW+"➤ "+ ChatColor.WHITE+"Игрок " + ChatColor.GREEN + targetPlayerName + ChatColor.WHITE+" ни разу" +
+                        ChatColor.RED + " не был" + ChatColor.WHITE + " вызван на проверку");
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
         return true;
     }
 }
