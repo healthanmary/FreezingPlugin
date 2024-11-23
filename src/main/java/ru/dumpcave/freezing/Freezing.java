@@ -42,7 +42,7 @@ public final class Freezing extends JavaPlugin {
         }    catch (IOException e) {
             e.printStackTrace(); }
         getCommand("check").setExecutor(freezingExecutor);
-        getCommand("checkhist").setExecutor(new CheckHistCommand(freezing));
+        getCommand("checkhist").setExecutor(new CheckHistCommand(this));
         getServer().getPluginManager().registerEvents(new ProphibitPlayerActions(this, freezingExecutor), this);
         activeActions();
     }
